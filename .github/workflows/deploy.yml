@@ -8,6 +8,9 @@ on:
 env:
   ECR_REPO: github-webhook
 
+permissions:
+  id-token: write
+
 jobs:
   deploy:
     runs-on: dokploy-arm64
