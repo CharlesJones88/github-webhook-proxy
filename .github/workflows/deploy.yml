@@ -1,0 +1,54 @@
+name: Deploy Webhook Proxy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  ECR_REPO: github-webhook
+
+jobs:
+  deploy:
+    runs-on: dokploy-arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Build Application
+        run: |
+          npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ''
+          aws-region: us-west-1
+
+      - name: Login to AWS ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        
+      - name: Build Image
+        uses: docker/build-push-action@v6
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        with:
+          push: true
+          tags: $ECR_REGISTRY/$ECR_REPO:latest,$ECR_REGISTRY/$ECR_REPO:${{ github.sha }}
+
+      - name: Deploy Lambda
+        uses: aws-actions/aws-lambda-deploy@v1.1.0
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        with:
+          function-name: github-webhook
+          package-type: Image
+          image-uri: $ECR_REGISTRY/$ECR_REPO:latest
