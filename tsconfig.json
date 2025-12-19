@@ -4,10 +4,6 @@
     "module": "nodenext",
     "target": "esnext",
     "types": ["node"],
-    // Other Outputs
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
