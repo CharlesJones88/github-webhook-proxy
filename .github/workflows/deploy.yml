@@ -57,6 +57,7 @@ jobs:
           context: .
           push: true
           provenance: false
+          platforms: linux/arm64
           tags: ${{ env.ECR_REGISTRY}}/${{ env.ECR_REPO }}:latest,${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO }}:${{ github.sha }}
 
       - name: Deploy Lambda
