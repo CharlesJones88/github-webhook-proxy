@@ -9,7 +9,7 @@ if [ "${TAILSCALE_CONNECT_TIMEOUT}" = "" ]; then
   export TAILSCALE_CONNECT_TIMEOUT=60
 fi
 timeout=$TAILSCALE_CONNECT_TIMEOUT
-until /var/runtime/tailscale up --auth-key=${TAILSCALE_AUTHKEY} --force-reauth
+until /var/runtime/tailscale up --auth-key=${TAILSCALE_AUTHKEY} --hostname=github-webhook --force-reauth
 do
   echo "tailscale up failed, pausing for 1s..."
   sleep 1
