@@ -38,7 +38,6 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::850516079625:role/github-webhook-proxy
           aws-region: us-west-1
-          role-chaining: true
 
       - name: Login to AWS ECR
         id: login-ecr
