@@ -32,6 +32,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'package-lock.json'
 
+      - name: Create Cache Dir
+        run: mkdir -p /tmp/.buildx-cache-app
+
       - name: Docker Cache
         uses: actions/cache@v5
         with:
