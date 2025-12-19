@@ -34,10 +34,11 @@ jobs:
           npm run build
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5.1.1
         with:
           role-to-assume: arn:aws:iam::850516079625:role/github-webhook-proxy
           aws-region: us-west-1
+          role-chaining: true
 
       - name: Login to AWS ECR
         id: login-ecr
