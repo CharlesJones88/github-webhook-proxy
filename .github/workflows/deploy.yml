@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: dokploy-arm64
+    runs-on: dokploy-amd64
     steps:
       - name: Checkout
         uses: actions/checkout@v6
