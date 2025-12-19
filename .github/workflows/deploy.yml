@@ -75,6 +75,11 @@ jobs:
             ${{ env.ECR_REGISTRY}}/${{ env.ECR_REPO }}:latest
             ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO }}:${{ github.sha }}
 
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache-app
+          mv /tmp/.buildx-cache-app-new /tmp/.buildx-cache-app
+
       - name: Deploy Lambda
         uses: aws-actions/aws-lambda-deploy@v1.1.0
         env:
