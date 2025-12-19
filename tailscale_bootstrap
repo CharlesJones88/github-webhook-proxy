@@ -2,7 +2,23 @@
 
 mkdir -p /tmp/tailscale
 /var/runtime/tailscaled --tun=userspace-networking --socks5-server=localhost:1055 &
-/var/runtime/tailscale up --auth-key=${TAILSCALE_AUTHKEY} --hostname=aws-lambda-app
+
+i=0
+if [ "${TAILSCALE_CONNECT_TIMEOUT}" = "" ]; then
+  export TAILSCALE_CONNECT_TIMEOUT=60
+fi
+timeout=$TAILSCALE_CONNECT_TIMEOUT
+until /var/runtime/tailscale up --auth-key=${TAILSCALE_AUTHKEY} --hostname=aws-lambda-app --force-reauth
+do
+  echo "tailscale up failed, pausing for 1s..."
+  sleep 1
+  i=$((i + 1))
+  if [ $i -ge $timeout ]; then
+    echo "tailscale up failed after $timeout seconds"
+    exit 1
+  fi
+done
+
 echo Tailscale started
 export ALL_PROXY=socks5h://localhost:1055
 exec /lambda-entrypoint.sh "$@"
