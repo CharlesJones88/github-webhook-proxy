@@ -2,24 +2,24 @@ import {
   type Context,
   type APIGatewayProxyResult,
   type APIGatewayProxyEventV2,
-} from "aws-lambda";
-import { pino } from "pino";
-import fetch from "node-fetch";
-import { SocksProxyAgent } from "socks-proxy-agent";
+} from 'aws-lambda';
+import { pino } from 'pino';
+import fetch from 'node-fetch';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 
-const { BASE_URL = "", ALL_PROXY = "", LOG_LEVEL = "info" } = process.env;
-const getMethods = new Set(["GET", "HEAD"]);
+const { BASE_URL = '', ALL_PROXY = '', LOG_LEVEL = 'info' } = process.env;
+const getMethods = new Set(['GET', 'HEAD']);
 const log = pino({
-  messageKey: "message",
+  messageKey: 'message',
   level: LOG_LEVEL,
   formatters: {
-    level: (label) => ({ level: label.toUpperCase() }),
+    level: label => ({ level: label.toUpperCase() }),
   },
 });
 
 export const handler = async (
   event: APIGatewayProxyEventV2,
-  _context: Context
+  _context: Context,
 ): Promise<APIGatewayProxyResult> => {
   const {
     body = null,
@@ -33,7 +33,7 @@ export const handler = async (
   if (!URL.canParse(BASE_URL)) {
     return {
       statusCode: 500,
-      body: "Internal Server Error",
+      body: 'Internal Server Error',
     };
   }
 
@@ -60,10 +60,10 @@ export const handler = async (
       body: await response.text(),
     };
   } catch (error) {
-    log.error("Error occurred: %s", error);
+    log.error('Error occurred: %s', error);
     return {
       statusCode: 500,
-      body: "Internal Server Error",
+      body: 'Internal Server Error',
     };
   }
 };

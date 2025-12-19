@@ -1,0 +1,7 @@
+singleQuote: true
+semi: true
+arrowParens: avoid
+bracketSpacing: true
+trailingComma: all
+objectWrap: preserve
+quoteProps: as-needed
