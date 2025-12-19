@@ -32,6 +32,14 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'package-lock.json'
 
+      - name: Docker Cache
+        uses: actions/cache@v5
+        with:
+          path: /tmp/.buildx-cache-app
+          key: ${{ runner.os }}-buildx-app-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-app
+
       - name: Install Dependencies
         run: npm ci
 
@@ -58,6 +66,8 @@ jobs:
           push: true
           provenance: false
           platforms: linux/arm64
+          cache-from: type=local,src=/tmp/.buildx-cache-app
+          cache-to: type=local,dest=/tmp/.buildx-cache-app-new,mode=max
           tags: |
             ${{ env.ECR_REGISTRY}}/${{ env.ECR_REPO }}:latest
             ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO }}:${{ github.sha }}
