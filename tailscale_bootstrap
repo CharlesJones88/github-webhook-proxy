@@ -1,14 +1,15 @@
 #!/bin/sh
 
-mkdir -p /tmp/tailscale
-/var/runtime/tailscaled --tun=userspace-networking --socks5-server=localhost:1055 &
+tmpdir=/tmp/tailscale
+mkdir -p $tmpdir
+/var/runtime/tailscaled --tun=userspace-networking --socks5-server=localhost:1055 --statedir $tmpdir 2>&1 | tee /tmp/stdout &
 
 i=0
 if [ "${TAILSCALE_CONNECT_TIMEOUT}" = "" ]; then
   export TAILSCALE_CONNECT_TIMEOUT=60
 fi
 timeout=$TAILSCALE_CONNECT_TIMEOUT
-until /var/runtime/tailscale up --auth-key=${TAILSCALE_AUTHKEY} --hostname=aws-lambda-app --force-reauth
+until /var/runtime/tailscale up --auth-key=${TAILSCALE_AUTHKEY} --force-reauth
 do
   echo "tailscale up failed, pausing for 1s..."
   sleep 1
