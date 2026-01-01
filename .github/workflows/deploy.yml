@@ -88,3 +88,6 @@ jobs:
           function-name: github-webhook
           package-type: Image
           image-uri: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO }}:latest
+          memory-size: 1024
+          timeout: 60
+          environment: '{"HOST":"http://dokploy.tail1a66f.ts.net"}'

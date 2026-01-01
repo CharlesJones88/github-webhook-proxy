@@ -1,26 +1,24 @@
 import {
-  type Context,
-  type APIGatewayProxyResult,
   type APIGatewayProxyEventV2,
-} from 'aws-lambda';
-import { pino } from 'pino';
-import fetch from 'node-fetch';
-import { SocksProxyAgent } from 'socks-proxy-agent';
+  type APIGatewayProxyResult,
+  type Context,
+} from "aws-lambda";
+import fetch from "node-fetch";
+import { SocksProxyAgent } from "socks-proxy-agent";
+import { logger as parent } from "./logger.js";
 
-const { BASE_URL = '', ALL_PROXY = '', LOG_LEVEL = 'info' } = process.env;
-const getMethods = new Set(['GET', 'HEAD']);
-const log = pino({
-  messageKey: 'message',
-  level: LOG_LEVEL,
-  formatters: {
-    level: label => ({ level: label.toUpperCase() }),
-  },
-});
+const { BASE_URL = "", ALL_PROXY = "" } = process.env;
+const getMethods = new Set(["GET", "HEAD"]);
 
 export const handler = async (
   event: APIGatewayProxyEventV2,
-  _context: Context,
+  context: Context,
 ): Promise<APIGatewayProxyResult> => {
+  const logger = parent.child({
+    awsRequestId: context.awsRequestId,
+    functionName: context.functionName,
+  });
+  logger.info("Request received");
   const {
     body = null,
     headers,
@@ -31,9 +29,10 @@ export const handler = async (
   } = event;
 
   if (!URL.canParse(BASE_URL)) {
+    logger.error("Invalid url: %s", BASE_URL);
     return {
       statusCode: 500,
-      body: 'Internal Server Error',
+      body: "Internal Server Error",
     };
   }
 
@@ -54,16 +53,24 @@ export const handler = async (
       agent: new SocksProxyAgent(ALL_PROXY),
     });
 
+    logger.info(
+      {
+        ok: response.ok,
+        status: response.status,
+      },
+      "Request finished with: %d ms remaining",
+      context.getRemainingTimeInMillis(),
+    );
     return {
       statusCode: response.status,
       headers: Object.fromEntries(response.headers.entries()),
       body: await response.text(),
     };
   } catch (error) {
-    log.error('Error occurred: %s', error);
+    logger.error({ error }, "An unknown error occurred");
     return {
       statusCode: 500,
-      body: 'Internal Server Error',
+      body: "Internal Server Error",
     };
   }
 };
