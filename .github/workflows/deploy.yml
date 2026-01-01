@@ -89,5 +89,5 @@ jobs:
           package-type: Image
           image-uri: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO }}:latest
           memory-size: 1024
-          timeout: 60
+          timeout: 120
           environment: '{"BASE_URL":"http://dokploy.tail1a66f.ts.net","TAILSCALE_AUTHKEY": "${{ secrets.TAILSCALE_AUTHKEY }}"}'
