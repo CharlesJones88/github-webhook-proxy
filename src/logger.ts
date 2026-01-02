@@ -1,7 +1,8 @@
 import { pino } from "pino";
-import { lokiSteam } from "./LokiStream.js";
+import { pinoLoki } from "./LokiStream.js";
 
-const { LEVEL = "INFO" } = process.env;
+const { BASE_URL = "", LEVEL = "INFO" } = process.env;
+const lokiEndpoint = "loki/api/v1/push";
 
 export const logger = pino(
   {
@@ -15,5 +16,9 @@ export const logger = pino(
       },
     },
   },
-  lokiSteam,
+  pinoLoki({
+    url: `${BASE_URL}/loki/${lokiEndpoint}`,
+    labels: { service: "github-webhook-proxy" },
+    batch: true,
+  }),
 );
