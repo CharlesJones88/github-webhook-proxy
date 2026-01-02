@@ -3,6 +3,7 @@ import fetch from "node-fetch";
 import { SocksProxyAgent } from "socks-proxy-agent";
 
 const { ALL_PROXY = "", BASE_URL = "" } = process.env;
+const lokiEndpoint = "loki/api/v1/push";
 
 export const lokiSteam = new Writable({
   objectMode: true,
@@ -16,7 +17,7 @@ export const lokiSteam = new Writable({
       ],
     };
 
-    fetch(`${BASE_URL}/loki/api/v1/push`, {
+    fetch(`${BASE_URL}/loki/${lokiEndpoint}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
