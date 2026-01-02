@@ -20,12 +20,19 @@ async function dispatch(
 
 class LokiBufferStream extends Writable {
   #buffer: Array<[string, string]> = [];
+  readonly #url: string;
+  readonly #batchSize: number;
+  readonly #labels: Labels;
+
   constructor(
-    private readonly url: string,
-    private readonly batchSize: number = 50,
-    private readonly labels: Labels = {},
+    url: string,
+    batchSize: number = 50,
+    labels: Labels = {},
   ) {
     super({ objectMode: true });
+    this.#url = url;
+    this.#batchSize = batchSize;
+    this.#labels = labels;
   }
 
   _write(
@@ -35,7 +42,7 @@ class LokiBufferStream extends Writable {
   ) {
     this.#buffer.push([`${Date.now() * 1e6}`, JSON.stringify(chunk)]);
 
-    if (this.#buffer.length >= this.batchSize) {
+    if (this.#buffer.length >= this.#batchSize) {
       this.flush().finally(callback);
     } else {
       callback();
@@ -53,19 +60,19 @@ class LokiBufferStream extends Writable {
     const body = {
       streams: [
         {
-          stream: this.labels,
+          stream: this.#labels,
           values: logsToSend,
         },
       ],
     };
 
     const response = await dispatch(
-      this.url,
+      this.#url,
       JSON.stringify(
         body,
       ),
     );
-    
+
     if (!response.ok) {
       this.#buffer.unshift(...logsToSend);
     }
