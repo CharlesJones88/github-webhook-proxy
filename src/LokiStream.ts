@@ -21,6 +21,14 @@ export const lokiSteam = new Writable({
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
       agent: new SocksProxyAgent(ALL_PROXY),
-    }).then(() => callback()).catch(callback);
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Loki returned ${response.status}`);
+      }
+      callback();
+    }).catch((error) => {
+      console.error("Failed to push to loki: ", error);
+      callback(error);
+    });
   },
 });

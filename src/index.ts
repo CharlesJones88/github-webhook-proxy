@@ -14,7 +14,6 @@ export const handler = async (
   event: APIGatewayProxyEventV2,
   context: Context,
 ): Promise<APIGatewayProxyResult> => {
-  context.callbackWaitsForEmptyEventLoop = true;
   const logger = parent.child({
     awsRequestId: context.awsRequestId,
     functionName: context.functionName,
