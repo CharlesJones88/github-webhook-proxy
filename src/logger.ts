@@ -1,8 +1,11 @@
 import { pino } from "pino";
 import { pinoLoki } from "./LokiStream.js";
 
-const { BASE_URL = "", LEVEL = "INFO" } = process.env;
-const lokiEndpoint = "loki/api/v1/push";
+const {
+  BASE_URL = "",
+  ENDPOINT = "",
+  LEVEL = "INFO",
+} = process.env;
 
 export const logger = pino(
   {
@@ -17,8 +20,8 @@ export const logger = pino(
     },
   },
   pinoLoki({
-    url: `${BASE_URL}/loki/${lokiEndpoint}`,
-    labels: { service: "github-webhook-proxy" },
+    url: `${BASE_URL}${ENDPOINT}`,
+    labels: { service: process.env.AWS_LAMBDA_FUNCTION_NAME },
     batch: true,
   }),
 );

@@ -4,7 +4,7 @@ import { SocksProxyAgent } from "socks-proxy-agent";
 
 const { ALL_PROXY = "" } = process.env;
 
-type Labels = Record<string, string>;
+type Labels = Record<string, string | undefined>;
 
 async function dispatch(
   url: string,
