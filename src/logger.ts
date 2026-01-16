@@ -23,5 +23,6 @@ export const logger = pino(
     url: `${BASE_URL}${ENDPOINT}`,
     labels: { service: process.env.AWS_LAMBDA_FUNCTION_NAME },
     batch: true,
+    batchSize: 1,
   }),
 );
