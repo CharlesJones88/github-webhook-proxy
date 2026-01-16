@@ -74,6 +74,7 @@ class LokiBufferStream extends Writable {
     );
 
     if (!response.ok) {
+      console.error("Error sending logs", await response.text());
       this.#buffer.unshift(...logsToSend);
     }
   }
