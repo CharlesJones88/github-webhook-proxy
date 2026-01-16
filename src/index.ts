@@ -67,7 +67,7 @@ export const handler = async (
       body: await response.text(),
     };
   } catch (error) {
-    logger.error({ error }, "An unknown error occurred");
+    logger.error(error, "An unknown error occurred");
     return {
       statusCode: 500,
       body: "Internal Server Error",
