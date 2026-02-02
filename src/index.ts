@@ -2,13 +2,43 @@ import {
   type APIGatewayProxyEventV2,
   type APIGatewayProxyResult,
   type Context,
-} from "aws-lambda";
-import fetch from "node-fetch";
-import { SocksProxyAgent } from "socks-proxy-agent";
-import { logger as parent } from "./logger.js";
+} from 'aws-lambda';
+import fetch from 'node-fetch';
+import { SocksProxyAgent } from 'socks-proxy-agent';
+import { logger, logger as parent } from './logger.js';
+import { setTimeout } from 'node:timers/promises';
 
-const { BASE_URL = "", ALL_PROXY = "" } = process.env;
-const getMethods = new Set(["GET", "HEAD"]);
+const { BASE_URL = '', ALL_PROXY = '' } = process.env;
+const getMethods = new Set(['GET', 'HEAD']);
+
+async function retryWithBackoff<T>(
+  callback: () => Promise<T>,
+  {
+    retry = 0,
+    maxRetries = 5,
+    jitterMultiplier = 5000,
+    backoff = 1000,
+    exponent = 2,
+  } = {},
+) {
+  if (retry >= maxRetries) {
+    throw new Error('Max Retries reached!');
+  }
+
+  try {
+    return await callback();
+  } catch (error) {
+    logger.warn(error, 'An error occurred making request');
+    const jitter = Math.random() * jitterMultiplier;
+    await setTimeout((backoff + jitter) ** exponent);
+    return await retryWithBackoff(callback, {
+      retry: retry + 1,
+      maxRetries,
+      backoff,
+      exponent,
+    });
+  }
+}
 
 export const handler = async (
   event: APIGatewayProxyEventV2,
@@ -18,7 +48,7 @@ export const handler = async (
     awsRequestId: context.awsRequestId,
     functionName: context.functionName,
   });
-  logger.info("Request received");
+  logger.info('Request received');
   const {
     body = null,
     headers,
@@ -29,10 +59,10 @@ export const handler = async (
   } = event;
 
   if (!URL.canParse(BASE_URL)) {
-    logger.error("Invalid url: %s", BASE_URL);
+    logger.error('Invalid url: %s', BASE_URL);
     return {
       statusCode: 500,
-      body: "Internal Server Error",
+      body: 'Internal Server Error',
     };
   }
 
@@ -46,19 +76,21 @@ export const handler = async (
   try {
     // Remove host header to ensure routing works
     delete headers.host;
-    const response = await fetch(url, {
-      method,
-      headers: headers as Record<string, string>,
-      body: getMethods.has(method) ? null : body,
-      agent: new SocksProxyAgent(ALL_PROXY),
-    });
+    const response = await retryWithBackoff(() =>
+      fetch(url, {
+        method,
+        headers: headers as Record<string, string>,
+        body: getMethods.has(method) ? null : body,
+        agent: new SocksProxyAgent(ALL_PROXY),
+      }),
+    );
 
     logger.info(
       {
         ok: response.ok,
         status: response.status,
       },
-      "Request finished with: %d ms remaining",
+      'Request finished with: %d ms remaining',
       context.getRemainingTimeInMillis(),
     );
     return {
@@ -67,10 +99,10 @@ export const handler = async (
       body: await response.text(),
     };
   } catch (error) {
-    logger.error(error, "An unknown error occurred");
+    logger.error(error, 'An unknown error occurred');
     return {
       statusCode: 500,
-      body: "Internal Server Error",
+      body: 'Internal Server Error',
     };
   }
 };
