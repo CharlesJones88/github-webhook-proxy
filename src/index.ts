@@ -16,7 +16,7 @@ async function retryWithBackoff<T>(
   {
     retry = 0,
     maxRetries = 5,
-    jitterMultiplier = 3250,
+    jitterMultiplier = 3200,
     backoff = 1000,
     exponent = 2,
   } = {},
