@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: dokploy-x64
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6

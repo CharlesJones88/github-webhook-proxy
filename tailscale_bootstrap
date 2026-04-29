@@ -6,7 +6,7 @@ mkdir -p $tmpdir
 
 i=0
 timeout=${TAILSCALE_CONNECT_TIMEOUT:-60}
-until /var/runtime/tailscale up --auth-key=${TAILSCALE_AUTHKEY} --hostname=github-webhook --force-reauth
+until /var/runtime/tailscale up --auth-key=${TAILSCALE_AUTHKEY} --advertise-tags=tag:lambda --hostname=github-webhook --force-reauth
 do
   sleep 1
   i=$((i + 1))
