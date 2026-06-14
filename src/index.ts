@@ -28,9 +28,14 @@ async function retryWithBackoff<T>(
   try {
     return await callback();
   } catch (error) {
-    logger.warn(error, 'An error occurred making request');
     const jitter = Math.round(Math.random() * jitterMultiplier);
-    await setTimeout((backoff + jitter) ** exponent);
+    const retryMs = (backoff + jitter) ** exponent;
+    await setTimeout(retryMs);
+    logger.warn(
+      error,
+      'An error occurred making request, retrying in %d ms',
+      retryMs,
+    );
     return await retryWithBackoff(callback, {
       retry: retry + 1,
       maxRetries,
